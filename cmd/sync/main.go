@@ -59,7 +59,7 @@ type syncPayload struct {
 	Items []*unstructured.Unstructured `json:"items"`
 }
 
-func grouVersionResource(o *unstructured.Unstructured) schema.GroupVersionResource {
+func groupVersionResource(o *unstructured.Unstructured) schema.GroupVersionResource {
 	//TODO need to figure out if there is an API for getting the resource type
 	return schema.GroupVersionResource{Group: o.GetObjectKind().GroupVersionKind().Group, Version: o.GetObjectKind().GroupVersionKind().Version, Resource: strings.ToLower(o.GetObjectKind().GroupVersionKind().Kind + "s")}
 }
@@ -98,7 +98,7 @@ func Reconcile(c dynamic.Interface, tc client.Client) {
 			}
 			for _, o := range payload.Items {
 				t, _ := meta.Accessor(o)
-				gvr := grouVersionResource(o)
+				gvr := groupVersionResource(o)
 				ns := &v1.Namespace{
 					TypeMeta: metav1.TypeMeta{
 						Kind:       "namespace",
