@@ -94,6 +94,19 @@ var apiResp = `
 			"namespace": "test"
 		},
 		"type": "Opaque"
+	},
+	{
+		"apiVersion": "v1",
+		"data": {
+			"password": "cGFzc3dvcmQ=",
+			"username": "dXNlci1uYW1l"
+		},
+		"kind": "ConfigMap",
+		"metadata": {
+			"name": "myconfigmap",
+			"namespace": "test2"
+		},
+		"type": "Opaque"
 	}
   ]
 }
