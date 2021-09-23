@@ -26,6 +26,8 @@ spec:
                   type: string
                 replicas:
                   type: integer
+                secretRef:
+                  type: string  
   # either Namespaced or Cluster
   scope: Namespaced
   names:

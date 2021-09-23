@@ -1,43 +1,18 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"net/http"
-	"path/filepath"
 	"time"
 
 	"github.com/gorilla/mux"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
 )
 
 func main() {
 
-	var kubeconfig *string
-	if home := homedir.HomeDir(); home != "" {
-		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	} else {
-		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	}
-	flag.Parse()
-
-	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	// create the clientset
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		panic(err.Error())
-	}
-
 	r := mux.NewRouter()
 
-	r.HandleFunc("/api/crontabs", Crontabs(*clientset))
+	r.HandleFunc("/api/crontabs", Crontabs())
 
 	srv := &http.Server{
 		Handler:      r,
@@ -49,20 +24,22 @@ func main() {
 	log.Fatal(srv.ListenAndServe())
 }
 
-/// apis/stable.example.com/v1/namespaces/*/crontabs/...
 var apiResp = `
 {
   "kind": "",
   "page": "1",
-  "size": "2",
-  "total": "2",
+  "size": "3",
+  "total": "3",
   "items":[
 	{
 		"apiVersion": "stable.example.com/v1",
 		"kind": "CronTab",
 		"metadata": {
 			"name": "my-new-cron-object",
-			"namespace":"test"
+			"namespace":"test",
+			"annotations":{
+				"status":"spec"
+			}
 		},
 		"spec": {
 			"cronSpec": "* * * * */10",
@@ -79,7 +56,8 @@ var apiResp = `
 		},
 		"spec": {
 			"cronSpec": "* * * * */5",
-			"image": "my-awesome-cron-image"
+			"image": "my-awesome-cron-image",
+			"secretRef":"mysecret"
 		}
 	},
 	{
@@ -94,33 +72,16 @@ var apiResp = `
 			"namespace": "test"
 		},
 		"type": "Opaque"
-	},
-	{
-		"apiVersion": "v1",
-		"data": {
-			"password": "cGFzc3dvcmQ=",
-			"username": "dXNlci1uYW1l"
-		},
-		"kind": "ConfigMap",
-		"metadata": {
-			"name": "myconfigmap",
-			"namespace": "test2"
-		},
-		"type": "Opaque"
 	}
   ]
 }
 `
 
-func Crontabs(cs kubernetes.Clientset) func(rw http.ResponseWriter, req *http.Request) {
+func Crontabs() func(rw http.ResponseWriter, req *http.Request) {
 
 	return func(rw http.ResponseWriter, req *http.Request) {
 		rw.Header().Add("content-type", "application/json")
-		rw.Header().Add("X-FM-GVK", "stable.example.com,v1,crontabs")
-		rw.Header().Add("X-FM-RESOURCE-NAMES", "my-new-cron-object,my-old-cron-object")
-		rw.Header().Add("X-FM-DELETE", "my-old-cron-object")
 		rw.Write([]byte(apiResp))
-
 	}
 
 }

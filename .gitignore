@@ -1,2 +1,4 @@
 cmd/sync/sync
 cmd/api/api
+cmd/sync/sync
+cmd/api/api

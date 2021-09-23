@@ -1,0 +1,12 @@
+{
+		"apiVersion": "stable.example.com/v1",
+		"kind": "CronTab",
+		"metadata": {
+			"name": "my-old-cron-object",
+			"namespace":"test"
+		},
+		"spec": {
+			"cronSpec": "* * * * */5",
+			"image": "my-awesome-cron-image"
+		}
+	}
