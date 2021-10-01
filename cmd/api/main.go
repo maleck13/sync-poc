@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -13,6 +15,7 @@ func main() {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/crontabs", Crontabs())
+	r.HandleFunc("/api/status", Status)
 
 	srv := &http.Server{
 		Handler:      r,
@@ -38,7 +41,7 @@ var apiResp = `
 			"name": "my-new-cron-object",
 			"namespace":"test",
 			"annotations":{
-				"status":"spec"
+				"status":"spec.cronSpec"
 			}
 		},
 		"spec": {
@@ -84,4 +87,19 @@ func Crontabs() func(rw http.ResponseWriter, req *http.Request) {
 		rw.Write([]byte(apiResp))
 	}
 
+}
+
+func Status(rw http.ResponseWriter, req *http.Request) {
+	dec := json.NewDecoder(req.Body)
+
+	defer req.Body.Close()
+	status := map[string]interface{}{}
+	if err := dec.Decode(&status); err != nil {
+		fmt.Println("error decoding status", err)
+		rw.WriteHeader(400)
+		return
+	}
+
+	pretty, _ := json.MarshalIndent(status, " ", " ")
+	fmt.Println(string(pretty))
 }

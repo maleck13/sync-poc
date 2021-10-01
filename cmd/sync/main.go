@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"flag"
@@ -139,6 +140,7 @@ func setupWatcher(ctx context.Context, o *unstructured.Unstructured, dc dynamic.
 					fmt.Println("watch failed to convert object ", err)
 				}
 				individualPaths := strings.Split(statusPaths, ",")
+				statusBody := map[string]interface{}{}
 				for _, p := range individualPaths {
 					jsonPath := strings.Split(p, ".")
 					status, _, err := unstructured.NestedFieldCopy(rawObj, jsonPath...)
@@ -146,7 +148,17 @@ func setupWatcher(ctx context.Context, o *unstructured.Unstructured, dc dynamic.
 						fmt.Println("watch error getting status field value", err)
 						continue
 					}
-					fmt.Println("status ", status)
+					statusBody[p] = status
+				}
+				data, err := json.Marshal(statusBody)
+				if err != nil {
+					fmt.Println("error marshalling status", err)
+					continue
+				}
+				b := bytes.NewBuffer(data)
+				if _, err := http.Post("http://localhost:8100/api/status", "application/json", b); err != nil {
+					fmt.Println("failed to post status", err)
+					continue
 				}
 			}
 		}
