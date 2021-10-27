@@ -1,6 +1,6 @@
 # Generic Sync
 
-This POC code illustrates how it is possible to sync resources from an API to a target kubernetes cluster without having to know the specific types. It also shows a mechanism for specifying data that you want reported back.
+This POC code that illustrates how it is possible to sync resources from an API to a target kubernetes cluster without having to know the specific types. It also shows a mechanism for specifying data that you want reported back.
 
 
 ## API
